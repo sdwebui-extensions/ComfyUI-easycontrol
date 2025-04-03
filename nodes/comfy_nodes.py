@@ -30,7 +30,7 @@ class EasyControlLoadFlux:
 
     def load_model(self, hf_token):
         login(token=hf_token)
-        base_path = "black-forest-labs/FLUX.1-dev"
+        base_path = "/stable-diffusion-cache/models/FLUX.1-dev"
         device = "cuda" if torch.cuda.is_available() else "cpu"
         cache_dir = folder_paths.get_folder_paths("diffusers")[0]
         print(cache_dir)
