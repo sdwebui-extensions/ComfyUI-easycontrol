@@ -8,13 +8,6 @@ import numpy as np
 # Add the parent directory to the Python path so we can import from easycontrol
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from diffusers.pipelines.flux.pipeline_output import FluxPipelineOutput
-from easycontrol.pipeline import FluxPipeline
-from easycontrol.transformer_flux import FluxTransformer2DModel
-from easycontrol.lora_helper import set_single_lora, set_multi_lora, unset_lora
-from huggingface_hub import login
-
-
 class EasyControlLoadFlux:
     @classmethod
     def INPUT_TYPES(cls):
@@ -29,7 +22,9 @@ class EasyControlLoadFlux:
     CATEGORY = "EasyControl"
 
     def load_model(self, hf_token):
-        login(token=hf_token)
+        # login(token=hf_token)
+        from easycontrol.pipeline import FluxPipeline
+        from easycontrol.transformer_flux import FluxTransformer2DModel
         base_path = "/stable-diffusion-cache/models/FLUX.1-dev"
         device = "cuda" if torch.cuda.is_available() else "cpu"
         cache_dir = folder_paths.get_folder_paths("diffusers")[0]
@@ -65,6 +60,7 @@ class EasyControlLoadLora:
 
     def load_lora(self, transformer, lora_name, lora_weight, cond_size):
         lora_path = folder_paths.get_full_path("loras", lora_name)
+        from easycontrol.lora_helper import set_single_lora
         set_single_lora(transformer, lora_path, lora_weights=[lora_weight], cond_size=cond_size)
         return (transformer,)
 
@@ -90,6 +86,7 @@ class EasyControlLoadMultiLora:
     def load_multi_lora(self, transformer, lora_name1, lora_weight1, lora_name2, lora_weight2, cond_size):
         lora_path1 = folder_paths.get_full_path("loras", lora_name1)
         lora_path2 = folder_paths.get_full_path("loras", lora_name2)
+        from easycontrol.lora_helper import set_multi_lora
         
         set_multi_lora(
             transformer, 
@@ -130,6 +127,7 @@ class EasyControlGenerate:
         # Clear cache before generation
         for name, attn_processor in transformer.attn_processors.items():
             attn_processor.bank_kv.clear()
+        from diffusers.pipelines.flux.pipeline_output import FluxPipelineOutput
         
         
         # Prepare spatial images
